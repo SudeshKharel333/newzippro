@@ -96,11 +96,7 @@ class ProfilePage extends StatelessWidget {
                       // Set login status to true
                       await AuthHelper.setLoginStatus(false);
 
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginPage()),
-                      );
+                      Get.offAllNamed('/login');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black, // Background color
