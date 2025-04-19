@@ -1,0 +1,15 @@
+12/18/2024
+Add "Add to cart button on product page"
+Add + - control above add to cart button
+Example : https://www.identixweb.com/wp-content/uploads/2021/05/A-Guide-on-Product-Bundle-widget-of-iCart-Cart-Drawer-Cart-Upsell.png
+Cleanup code: remove all unused references and change const where needed
+Create a helper like auth_helper called cart_helper with method 
+    addToCart(productId, quantity)
+    clearCart() = 
+    changeProductQuantity(productId, quantity)
+    getAllcartItems()
+CCCCCCOOOOOOMMMMMMMMMMMMMIIIIITTTTTT
+
+isLoggedIn = true/false
+
+cart => product -> ?, product -> ?
