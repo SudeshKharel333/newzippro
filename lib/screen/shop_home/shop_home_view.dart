@@ -49,7 +49,7 @@ class _ShopHomePageState extends State<ShopHomePage> {
 
   Future<void> fetchCategories() async {
     // Define the URL to fetch categories from the server.
-    final url = Uri.parse('http://192.168.100.230:4000/api/categories');
+    final url = Uri.parse('http://192.168.1.70:4000/api/categories');
 
     try {
       // Make an HTTP GET request to the server to get categories.
@@ -77,7 +77,7 @@ class _ShopHomePageState extends State<ShopHomePage> {
 
   Future<void> fetchProducts() async {
     // Define the URL to fetch products from the server.
-    final url = Uri.parse('http://192.168.100.230:4000/api/products');
+    final url = Uri.parse('http://192.168.1.70:4000/api/products');
 
     try {
       // Make an HTTP GET request to the server to get the list of products.
@@ -363,7 +363,7 @@ class _ShopHomePageState extends State<ShopHomePage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
-                'http://192.168.100.230:4000/images/${product.image}',
+                'http://192.168.1.70:4000/images/${product.image}',
                 fit: BoxFit.cover,
                 height: 100,
                 width: double.infinity,

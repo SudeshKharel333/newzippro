@@ -49,7 +49,7 @@ class LoginLogic extends GetxController {
       debugPrint("inside api call2" + email + "-" + password);
 
       var response = await dio.post(
-        'http://192.168.100.230:4000/login',
+        'http://192.168.1.70:4000/login',
         data: {
           'email': email,
           'password': password,
