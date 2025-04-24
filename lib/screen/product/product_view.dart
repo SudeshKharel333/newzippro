@@ -1,23 +1,32 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-//import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
+import 'package:quantity_input/quantity_input.dart';
 
-class ProductPage extends StatelessWidget {
+class ProductPage extends StatefulWidget {
   final int productId;
 
-  const ProductPage({required this.productId});
+  ProductPage({required this.productId});
+
+  @override
+  _ProductPageState createState() => _ProductPageState();
+}
+
+class _ProductPageState extends State<ProductPage> {
+  late Future<Map<String, dynamic>> productFuture;
+  int quantity = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    productFuture = fetchProductData();
+// Fetch data once when the widget is initialized
+  }
 
   Future<Map<String, dynamic>> fetchProductData() async {
-    // final dio = Dio();
-    final url = Uri.parse('http://192.168.100.230:4000/product/$productId');
-
-    // try {
+    final url =
+        Uri.parse('http://192.168.1.70:4000/product/${widget.productId}');
     final response = await http.get(url);
-    // Make an HTTP GET request to the serve
-    // final response =
-    //     await dio.get('http://192.168.100.230:4000/product/$productId');
     debugPrint(response.body);
     return jsonDecode(response.body);
   }
@@ -27,7 +36,7 @@ class ProductPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: FutureBuilder<Map<String, dynamic>>(
-          future: fetchProductData(),
+          future: productFuture, // Use the pre-fetched data
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Text('Loading...');
@@ -43,7 +52,7 @@ class ProductPage extends StatelessWidget {
         ),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: fetchProductData(),
+        future: productFuture, // Use the pre-fetched data
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -70,7 +79,7 @@ class ProductPage extends StatelessWidget {
                   SizedBox(height: 16),
                   product['image'] != null
                       ? Image.network(
-                          'http://192.168.100.230:4000/images/${product['image']}')
+                          'http://192.168.1.70:4000/images/${product['image']}')
                       : SizedBox.shrink(),
                   SizedBox(height: 16),
                   Text(
@@ -79,11 +88,18 @@ class ProductPage extends StatelessWidget {
                   ),
                   Text(product['description']),
                   SizedBox(height: 16),
-
-                  // Text(
-                  //   'Category: ${product['category']}',
-                  //   style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-                  // ),
+                  QuantityInput(
+                    value: quantity,
+                    onChanged: (value) {
+                      int newValue =
+                          int.tryParse(value.replaceAll(',', '')) ?? 0;
+                      if (newValue != quantity) {
+                        setState(() {
+                          quantity = newValue;
+                        });
+                      }
+                    },
+                  ),
                 ],
               ),
             );
