@@ -21,7 +21,8 @@ class LoginLogic extends GetxController {
 
   //final _provider = AuthProvider();
   LoginResponse loginResponse = LoginResponse();
-  final storage = GetStorage();
+
+  final data = GetStorage();
   Dio dio = Dio(BaseOptions(
       // baseUrl: 'http://localhost',
       //connectTimeout: const Duration(seconds: 10),
@@ -69,7 +70,7 @@ class LoginLogic extends GetxController {
         final userId = response.data['user_id'];
 
         // Store user ID in GetStorage for later use
-        storage.write('userId', userId);
+        data.write('userId', userId);
 
         Get.offAllNamed(AppRoutes.homeScreen);
       }

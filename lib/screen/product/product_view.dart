@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:quantity_input/quantity_input.dart';
 
+import 'package:intl/intl.dart';
+
 class ProductPage extends StatefulWidget {
   final int productId;
-
   ProductPage({required this.productId});
 
   @override
@@ -13,6 +15,8 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductPageState extends State<ProductPage> {
+  final data = GetStorage();
+
   late Future<Map<String, dynamic>> productFuture;
   int quantity = 0;
 
@@ -25,7 +29,7 @@ class _ProductPageState extends State<ProductPage> {
 
   Future<Map<String, dynamic>> fetchProductData() async {
     final url =
-        Uri.parse('http://192.168.1.70:4000/product/${widget.productId}');
+        Uri.parse('http://192.168.1.70:3500/product/${widget.productId}');
     final response = await http.get(url);
     debugPrint(response.body);
     return jsonDecode(response.body);
@@ -33,6 +37,8 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   Widget build(BuildContext context) {
+    final int? userId = data.read('userId');
+
     return Scaffold(
       appBar: AppBar(
         title: FutureBuilder<Map<String, dynamic>>(
@@ -79,7 +85,7 @@ class _ProductPageState extends State<ProductPage> {
                   SizedBox(height: 16),
                   product['image'] != null
                       ? Image.network(
-                          'http://192.168.1.70:4000/images/${product['image']}')
+                          'http://192.168.1.70:3500/images/${product['image']}')
                       : SizedBox.shrink(),
                   SizedBox(height: 16),
                   Text(
@@ -88,6 +94,10 @@ class _ProductPageState extends State<ProductPage> {
                   ),
                   Text(product['description']),
                   SizedBox(height: 16),
+                  Text(
+                    "quantity",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   QuantityInput(
                     value: quantity,
                     onChanged: (value) {
@@ -100,6 +110,40 @@ class _ProductPageState extends State<ProductPage> {
                       }
                     },
                   ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final url =
+                          Uri.parse("http://192.168.1.70:3500/addToCart");
+
+                      final response = await http.post(
+                        url,
+                        headers: {"Content-Type": "application/json"},
+                        body: jsonEncode({
+                          "user_id": userId, // replace with logged in user's ID
+                          "product_id": widget.productId,
+                          "quantity":
+                              quantity, // quantity from your quantity input
+                          "price": product["price"],
+                          "product_name": product["product_name"],
+                          "image": product["image"],
+                          "date":
+                              DateFormat("yyyy-MM-dd").format(DateTime.now()),
+                        }),
+                      );
+
+                      if (response.statusCode == 200) {
+                        final data = jsonDecode(response.body);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(data['message'])),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to add to cart')),
+                        );
+                      }
+                    },
+                    child: Text("Add to Cart"),
+                  )
                 ],
               ),
             );
