@@ -49,14 +49,14 @@ class LoginLogic extends GetxController {
       debugPrint("inside api call2" + email + "-" + password);
 
       var response = await dio.post(
-        'http://192.168.1.70:4000/login',
+        'http://192.168.1.70:3500/login',
         data: {
           'email': email,
           'password': password,
         },
         options: Options(
           headers: {'Content-Type': 'application/json; charset=utf-8'},
-          extra: {'port': 4000},
+          extra: {'port': 3500},
         ),
       );
       Get.back(); // Dismiss loading dialog
@@ -66,7 +66,7 @@ class LoginLogic extends GetxController {
         AuthHelper.setLoginStatus(true);
 
 // Extract user ID from response data (assuming response contains an ID field)
-        final userId = response.data['id'];
+        final userId = response.data['user_id'];
 
         // Store user ID in GetStorage for later use
         storage.write('userId', userId);
