@@ -22,7 +22,7 @@ class LoginLogic extends GetxController {
   //final _provider = AuthProvider();
   LoginResponse loginResponse = LoginResponse();
 
-  final data = GetStorage();
+  final storage = GetStorage();
   Dio dio = Dio(BaseOptions(
       // baseUrl: 'http://localhost',
       //connectTimeout: const Duration(seconds: 10),
@@ -67,10 +67,13 @@ class LoginLogic extends GetxController {
         AuthHelper.setLoginStatus(true);
 
 // Extract user ID from response data (assuming response contains an ID field)
-        final userId = response.data['user_id'];
+        final userId = response.data['userId'];
+        debugPrint('Loginlogic initial  user_id: $userId');
 
         // Store user ID in GetStorage for later use
-        data.write('userId', userId);
+        final user = storage.write('userId', userId);
+        print(user);
+        debugPrint('Loginlogic userId: $userId');
 
         Get.offAllNamed(AppRoutes.homeScreen);
       }
