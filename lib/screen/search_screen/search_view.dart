@@ -55,7 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
       try {
         // Update the URL with query parameter for search
         final response = await _dio.get(
-          'http://192.168.1.75:4000/api/products/search',
+          'http://192.168.1.70:3500/api/products/search',
           queryParameters: {'query': query}, // Pass the search query
         );
         if (response.statusCode == 200) {
