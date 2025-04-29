@@ -15,7 +15,7 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductPageState extends State<ProductPage> {
-  final data = GetStorage();
+  final storage = GetStorage();
 
   late Future<Map<String, dynamic>> productFuture;
   int quantity = 0;
@@ -37,7 +37,14 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    final int? userId = data.read('userId');
+    int? userId;
+
+    try {
+      userId = storage.read('userId');
+    } catch (e) {
+      print('Error reading userId: $e');
+    }
+    print("ProductView userId is ${userId}");
 
     return Scaffold(
       appBar: AppBar(
@@ -99,7 +106,8 @@ class _ProductPageState extends State<ProductPage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   QuantityInput(
-                    value: quantity,
+                    value:
+                        quantity < 1 ? 1 : quantity, // Always show at least 1
                     onChanged: (value) {
                       int newValue =
                           int.tryParse(value.replaceAll(',', '')) ?? 0;
@@ -112,24 +120,31 @@ class _ProductPageState extends State<ProductPage> {
                   ),
                   ElevatedButton(
                     onPressed: () async {
+                      if (userId == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('User not logged in')),
+                        );
+                        return;
+                      }
                       final url =
                           Uri.parse("http://192.168.1.70:3500/addToCart");
+                      print("DEBUG: userId = $userId");
 
                       final response = await http.post(
                         url,
                         headers: {"Content-Type": "application/json"},
                         body: jsonEncode({
-                          "user_id": userId, // replace with logged in user's ID
+                          "user_id": userId, // replace with logged-in user's ID
                           "product_id": widget.productId,
                           "quantity":
                               quantity, // quantity from your quantity input
                           "price": product["price"],
                           "product_name": product["product_name"],
                           "image": product["image"],
-                          "date":
-                              DateFormat("yyyy-MM-dd").format(DateTime.now()),
                         }),
                       );
+
+                      print("The user_id is $userId");
 
                       if (response.statusCode == 200) {
                         final data = jsonDecode(response.body);
@@ -141,6 +156,9 @@ class _ProductPageState extends State<ProductPage> {
                           SnackBar(content: Text('Failed to add to cart')),
                         );
                       }
+
+                      print("Response code: ${response.statusCode}");
+                      print("Response body: ${response.body}");
                     },
                     child: Text("Add to Cart"),
                   )
