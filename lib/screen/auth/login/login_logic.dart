@@ -61,7 +61,7 @@ class LoginLogic extends GetxController {
         ),
       );
       Get.back(); // Dismiss loading dialog
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data['success'] == true) {
         // Successfully logged in
         debugPrint('Login successful: ${response.data}');
         AuthHelper.setLoginStatus(true);
@@ -76,6 +76,25 @@ class LoginLogic extends GetxController {
         debugPrint('Loginlogic userId: $userId');
 
         Get.offAllNamed(AppRoutes.homeScreen);
+      } else {
+        // Login failed even if status is 200
+        Get.back(); // Dismiss loading
+        showDialog(
+          context: Get.context!,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return CostumeDialog(
+              title: "Error",
+              titleColor: Colors.red,
+              message: response.data['message'] ?? "Login failed",
+              buttom1Lavel: "OK",
+              onButton1Clicked: () async {
+                Get.back();
+              },
+              button2Enabled: false,
+            );
+          },
+        );
       }
     } catch (e) {
       String errorMessage = "";
