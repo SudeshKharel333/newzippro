@@ -80,7 +80,7 @@ class ProfilePage extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       // Add action here
-                      Get.to(const EditProfileView());
+                      Get.offAllNamed('/editProfile');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue, // Background color
