@@ -11,34 +11,22 @@ class SearchScreen extends StatefulWidget {
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
-String? _selectedSortOption = 'Price: Low to High'; // Default sorting option
+// Sorting options
+String? _selectedSortOption = 'Price: Low to High';
 List<String> _sortOptions = [
   'Price: Low to High',
   'Price: High to Low',
   'Rating: High to Low',
   'Rating: Low to High'
 ];
-void _sortProducts(String sortOption) {
-  // Pass the selected sort option to the backend or the product list logic
-  debugPrint('Sorting by: $sortOption');
-  // Call the method to sort products based on the selected option
-  // For example, you can call an API to fetch sorted products
-  fetchSortedProducts(sortOption);
-}
-
-// This method would call the backend or sort your list of products based on the selected option
-void fetchSortedProducts(String sortOption) {
-  // Your API call or local sorting logic will go here.
-  // For example:
-  // if (sortOption == 'Price: Low to High') { sortByPrice('asc'); }
-  // else if (sortOption == 'Rating: High to Low') { sortByRating('desc'); }
-}
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final Dio _dio = Dio();
+
   List<Product> _products = [];
   List<Product> _filteredProducts = [];
-  final Dio _dio = Dio();
+
   bool _isLoading = false;
   String _errorMessage = "";
 
@@ -51,31 +39,54 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Future<void> searchProducts(String query) async {
     if (query.isNotEmpty) {
-      debugPrint('===> Searching api for $query');
+      setState(() {
+        _isLoading = true;
+        _errorMessage = "";
+      });
+
       try {
-        // Update the URL with query parameter for search
         final response = await _dio.get(
           'http://192.168.1.70:3500/api/products/search',
-          queryParameters: {'query': query}, // Pass the search query
+          queryParameters: {'query': query},
         );
+
         if (response.statusCode == 200) {
           setState(() {
             _products = List<Product>.from(
               response.data.map((item) => Product.fromJson(item)),
             );
-            _filteredProducts = _products; // Initially display all products
+            _filteredProducts = _products;
+            _sortProductList();
           });
         } else {
-          debugPrint('Failed to load products: ${response.statusCode}');
+          setState(() {
+            _errorMessage = 'Failed to load products: ${response.statusCode}';
+          });
         }
       } catch (e) {
-        debugPrint('Error fetching products: $e');
+        setState(() {
+          _errorMessage = 'Error fetching products: $e';
+        });
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
 
   void _onSearchBoxTextChange(String searchText) {
     searchProducts(searchText);
+  }
+
+  void _sortProductList() {
+    setState(() {
+      if (_selectedSortOption == 'Price: Low to High') {
+        _filteredProducts.sort((a, b) => a.price.compareTo(b.price));
+      } else if (_selectedSortOption == 'Price: High to Low') {
+        _filteredProducts.sort((a, b) => b.price.compareTo(a.price));
+      }
+    });
   }
 
   @override
@@ -108,6 +119,35 @@ class _SearchScreenState extends State<SearchScreen> {
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                         ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Sort by:",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          DropdownButton<String>(
+                            value: _selectedSortOption,
+                            items: _sortOptions.map((String option) {
+                              return DropdownMenuItem<String>(
+                                value: option,
+                                child: Text(option),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  _selectedSortOption = newValue;
+                                  _sortProductList();
+                                });
+                              }
+                            },
+                          ),
+                        ],
                       ),
                     ),
                     Expanded(
