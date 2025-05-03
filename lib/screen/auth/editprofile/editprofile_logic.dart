@@ -24,9 +24,7 @@ class EditprofileLogic extends GetxController {
         passwordController.text.isEmpty ||
         confirmPasswordController.text.isEmpty ||
         phoneController.text.isEmpty ||
-        fullNameController.text.isEmpty)
-    //|| imageFile == null) {
-    {
+        fullNameController.text.isEmpty) {
       Get.snackbar('Error', 'Please fill in all fields.');
       return;
     }
@@ -43,35 +41,51 @@ class EditprofileLogic extends GetxController {
 
     try {
       final box = GetStorage();
-      String id = box
-          .read('userId'); // Replace 'userId' with the key used to store the ID
+      int user_id = box.read('userId');
 
-      dio_form_data.FormData formData = dio_form_data.FormData.fromMap({
-        'id': id,
-        'email': emailController.text,
-        'password': passwordController.text,
-        'fullName': fullNameController.text,
-        'phone': phoneController.text,
-        // 'imageFile': await dio_form_data.MultipartFile.fromFile(
-        // _imageFile!.path,
-        // filename: 'upload.jpg',
-        // ),
+      // if (user_id == null) {
+      //   Get.snackbar('Error', 'User ID not found.');
+      //   return;
+      // }
+
+      debugPrint("The user ID is $user_id");
+
+      final formData = dio_form_data.FormData.fromMap({
+        "user_id": user_id,
+        "email": emailController.text,
+        "password": passwordController.text,
+        "fullName": fullNameController.text,
+        "phone": phoneController.text,
       });
 
       final response = await _dio.post(
-        'http://192.168.1.74:3000/updateProfile', // replace <YOUR_LOCAL_IP> with your IP address
+        'http://192.168.1.70:3500/api/updateProfile',
         data: formData,
-        //debugPrint('inside api');
       );
 
       if (response.statusCode == 200) {
-        Get.snackbar('Success', 'update successful!');
+        Get.snackbar('Success', 'Profile updated successfully!');
       } else {
-        Get.snackbar('Error', 'Update failed. ${response.data}');
+        Get.snackbar('Error', 'Update failed: ${response.statusMessage}');
       }
     } catch (e) {
       debugPrint('Error: $e');
-      Get.snackbar('Error', 'An error occurred during update.');
+
+      String errorMessage = 'An error occurred while updating the profile.';
+
+      if (e is dio_form_data.DioException) {
+        if (e.response != null) {
+          debugPrint('Response data: ${e.response?.data}');
+          debugPrint('Status code: ${e.response?.statusCode}');
+          errorMessage = e.response?.data['error'] ?? errorMessage;
+        } else {
+          debugPrint('DioException message: ${e.message}');
+          errorMessage =
+              'No response from server. Check your internet connection.';
+        }
+      }
+
+      Get.snackbar('Error', errorMessage);
     }
   }
 
