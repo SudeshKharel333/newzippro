@@ -52,7 +52,7 @@ class RegisterLogic extends GetxController {
       });
 
       final response = await _dio.post(
-        'http://192.168.1.74:3000/register', // replace <YOUR_LOCAL_IP> with your IP address
+        'http://192.168.1.70:3500/register', // replace <YOUR_LOCAL_IP> with your IP address
         data: formData,
         //debugPrint('inside api');
       );
