@@ -2,6 +2,7 @@ import 'package:dio/dio.dart' as dio_form_data;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:newzippro/constants/config.dart';
 import '/core/helper/input_validator.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -59,7 +60,7 @@ class EditprofileLogic extends GetxController {
       });
 
       final response = await _dio.post(
-        'http://192.168.1.70:3500/api/updateProfile',
+        '${AppConfig.baseUrl}/api/updateProfile',
         data: formData,
       );
 

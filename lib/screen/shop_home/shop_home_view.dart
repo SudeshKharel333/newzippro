@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:newzippro/constants/config.dart';
 import '/screen/cart_screen.dart';
 import '/screen/search_screen/search_view.dart';
 import '/widgets/category.dart';
@@ -49,7 +50,7 @@ class _ShopHomePageState extends State<ShopHomePage> {
 
   Future<void> fetchCategories() async {
     // Define the URL to fetch categories from the server.
-    final url = Uri.parse('http://192.168.1.70:3500/api/categories');
+    final url = Uri.parse('${AppConfig.baseUrl}/api/categories');
 
     try {
       // Make an HTTP GET request to the server to get categories.
@@ -77,7 +78,7 @@ class _ShopHomePageState extends State<ShopHomePage> {
 
   Future<void> fetchProducts() async {
     // Define the URL to fetch products from the server.
-    final url = Uri.parse('http://192.168.1.70:3500/api/products');
+    final url = Uri.parse('${AppConfig.baseUrl}/api/products');
 
     try {
       // Make an HTTP GET request to the server to get the list of products.
@@ -363,7 +364,7 @@ class _ShopHomePageState extends State<ShopHomePage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
-                'http://192.168.1.70:3500/images/${product.image}',
+                '${AppConfig.baseUrl}/images/${product.image}',
                 fit: BoxFit.cover,
                 height: 100,
                 width: double.infinity,

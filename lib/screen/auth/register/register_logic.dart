@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart' as dio_form_data;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:newzippro/constants/config.dart';
 import '/core/helper/input_validator.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -52,7 +53,7 @@ class RegisterLogic extends GetxController {
       });
 
       final response = await _dio.post(
-        'http://192.168.1.70:3500/register', // replace <YOUR_LOCAL_IP> with your IP address
+        '${AppConfig.baseUrl}/register', // replace <YOUR_LOCAL_IP> with your IP address
         data: formData,
         //debugPrint('inside api');
       );

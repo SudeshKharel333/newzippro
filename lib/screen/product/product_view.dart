@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:newzippro/constants/config.dart';
 import 'package:quantity_input/quantity_input.dart';
 
 import 'package:intl/intl.dart';
@@ -28,8 +29,7 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   Future<Map<String, dynamic>> fetchProductData() async {
-    final url =
-        Uri.parse('http://192.168.1.70:3500/product/${widget.productId}');
+    final url = Uri.parse('${AppConfig.baseUrl}/product/${widget.productId}');
     final response = await http.get(url);
     debugPrint(response.body);
     return jsonDecode(response.body);
@@ -92,7 +92,7 @@ class _ProductPageState extends State<ProductPage> {
                   SizedBox(height: 16),
                   product['image'] != null
                       ? Image.network(
-                          'http://192.168.1.70:3500/images/${product['image']}')
+                          '${AppConfig.baseUrl}/images/${product['image']}')
                       : SizedBox.shrink(),
                   SizedBox(height: 16),
                   Text(
@@ -126,8 +126,7 @@ class _ProductPageState extends State<ProductPage> {
                         );
                         return;
                       }
-                      final url =
-                          Uri.parse("http://192.168.1.70:3500/addToCart");
+                      final url = Uri.parse("${AppConfig.baseUrl}/addToCart");
                       print("DEBUG: userId = $userId");
 
                       final response = await http.post(

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:newzippro/constants/config.dart';
 import '/screen/auth/auth_helper.dart';
 import '/screen/auth/editprofile/editprofile_view.dart';
 import '/screen/auth/login/login_view.dart';
@@ -35,13 +36,29 @@ class Profile {
 Future<Profile> fetchProfile() async {
   final int userId = GetStorage().read('userId');
   final response = await http.get(
-    Uri.parse('http://192.168.1.70:3500/api/users/$userId'),
+    Uri.parse('${AppConfig.baseUrl}/api/users/$userId'),
   );
 
   if (response.statusCode == 200) {
     return Profile.fromJson(jsonDecode(response.body));
   } else {
     throw Exception('Failed to load profile details');
+  }
+}
+
+Future<void> deleteUser() async {
+  final int userId = GetStorage().read('userId');
+  final response = await http.delete(
+    Uri.parse('${AppConfig.baseUrl}/api/deleteUser/$userId'),
+  );
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
+    final String message = responseData['message'];
+    print('Success: $message');
+  } else {
+    throw Exception(
+        'Failed to delete user. Status code: ${response.statusCode}');
   }
 }
 
@@ -157,6 +174,20 @@ class _ProfilePageState extends State<ProfilePage> {
                         horizontal: 24, vertical: 12),
                   ),
                   child: const Text("Logout"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await AuthHelper.setLoginStatus(false);
+                    deleteUser();
+                    Get.offAllNamed('/login');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                  ),
+                  child: const Text("Delete account"),
                 ),
               ],
             ),

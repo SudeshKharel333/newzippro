@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:newzippro/constants/config.dart';
 //import '/constants/api.dart';
 import '/core/widgets/loading_dialog.dart';
 import '/models/login_response.dart';
@@ -50,7 +51,7 @@ class LoginLogic extends GetxController {
       debugPrint("inside api call2" + email + "-" + password);
 
       var response = await dio.post(
-        'http://192.168.1.70:3500/login',
+        '${AppConfig.baseUrl}/login',
         data: {
           'email': email,
           'password': password,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:newzippro/constants/config.dart';
 import '/screen/product/product_view.dart';
 import '/widgets/product.dart';
 
@@ -46,7 +47,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
       try {
         final response = await _dio.get(
-          'http://192.168.1.70:3500/api/products/search',
+          '${AppConfig.baseUrl}/api/products/search',
           queryParameters: {'query': query},
         );
 

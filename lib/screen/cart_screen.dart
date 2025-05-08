@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import '/widgets/cart.dart';
+import 'package:newzippro/constants/config.dart';
+import '/widgets/cart.dart'; // Assuming CartItem is defined here
+import 'package:get_storage/get_storage.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -9,37 +13,47 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  // Cart item model
-  List<CartItem> cartItems = [
-    CartItem(
-        id: 1,
-        title: "Product 1",
-        price: 100,
-        quantity: 1,
-        imageUrl: "https://via.placeholder.com/150"),
-    CartItem(
-        id: 2,
-        title: "Product 2",
-        price: 200,
-        quantity: 1,
-        imageUrl: "https://via.placeholder.com/150"),
-    CartItem(
-        id: 3,
-        title: "Product 3",
-        price: 150,
-        quantity: 1,
-        imageUrl: "https://via.placeholder.com/150"),
-  ];
+  final storage = GetStorage();
+  List<CartItem> cartItems = [];
+  int? userId;
 
-  // Calculate the total price
+  @override
+  void initState() {
+    super.initState();
+    userId = storage.read('userId');
+    if (userId != null) {
+      fetchItems(userId!);
+    } else {
+      debugPrint('User ID not found in storage');
+    }
+  }
+
+  Future<void> fetchItems(int userId) async {
+    final url = Uri.parse('${AppConfig.baseUrl}/api/cartitems/$userId');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+
+        setState(() {
+          cartItems = data.map((item) => CartItem.fromJson(item)).toList();
+        });
+      } else {
+        debugPrint('Failed to load cart items');
+      }
+    } catch (e) {
+      debugPrint("Error fetching cart items: $e");
+    }
+  }
+
   double get totalPrice {
     return cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
   }
 
-  // Update quantity
   void updateQuantity(int id, int change) {
     setState(() {
-      final item = cartItems.firstWhere((item) => item.id == id);
+      final item = cartItems.firstWhere((item) => item.product_id == id);
       item.quantity += change;
       if (item.quantity < 1) {
         item.quantity = 1;
@@ -47,18 +61,19 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
-  // Remove item from cart
   void removeItem(int id) {
     setState(() {
-      cartItems.removeWhere((item) => item.id == id);
+      cartItems.removeWhere((item) => item.product_id == id);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    double totalCost = cartItems.fold(0, (sum, item) => sum + item.total);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Cart'),
+        title: const Text('Cart'),
         backgroundColor: Colors.blue,
         centerTitle: true,
       ),
@@ -77,95 +92,26 @@ class _CartScreenState extends State<CartScreen> {
                     itemBuilder: (context, index) {
                       final item = cartItems[index];
                       return Card(
-                        margin: const EdgeInsets.all(10),
-                        elevation: 4,
+                        margin: const EdgeInsets.all(8),
                         child: ListTile(
-                          leading: Image.network(
-                            item.imageUrl,
-                            fit: BoxFit.cover,
-                            width: 70,
-                            height: 70,
-                          ),
-                          title: Text(item.title),
-                          subtitle: Text("\$${item.price.toStringAsFixed(2)}"),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                onPressed: () => updateQuantity(item.id, -1),
-                                icon: const Icon(Icons.remove),
-                              ),
-                              Text(item.quantity.toString()),
-                              IconButton(
-                                onPressed: () => updateQuantity(item.id, 1),
-                                icon: const Icon(Icons.add),
-                              ),
-                              IconButton(
-                                onPressed: () => removeItem(item.id),
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ],
-                          ),
+                          leading: Image.network(item.image,
+                              width: 50, height: 50, fit: BoxFit.cover),
+                          title: Text(item.product_name),
+                          subtitle: Text(
+                              'Price: Rs.${item.price} x ${item.quantity}'),
+                          trailing: Text(
+                              'Total: Rs.${item.total.toStringAsFixed(2)}'),
                         ),
                       );
                     },
                   ),
                 ),
-                // Bottom section for total and checkout
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 5,
-                        offset: Offset(0, -3),
-                      )
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Total:',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            "\$${totalPrice.toStringAsFixed(2)}",
-                            style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.all(15),
-                              backgroundColor: Colors.blue),
-                          onPressed: () {
-                            // Handle checkout logic here
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Proceeding to Checkout...'),
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            'Proceed to Checkout',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Grand Total: Rs.${totalCost.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 )
               ],
