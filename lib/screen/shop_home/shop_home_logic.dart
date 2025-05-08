@@ -2,7 +2,7 @@ import 'package:carousel_slider/carousel_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import '/constants/api.dart';
+
 import 'package:dio/dio.dart' as responsee;
 import '/providers/shop_provider.dart';
 import '/providers/slider_provider.dart';
