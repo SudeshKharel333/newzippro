@@ -61,7 +61,7 @@ class AppPages {
     // Profile Page Route
     GetPage(
       name: AppRoutes.profilePage,
-      page: () => const ProfilePage(),
+      page: () => ProfilePage(),
       binding: ProfileBinding(),
     ),
 
