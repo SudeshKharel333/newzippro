@@ -195,7 +195,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                           borderRadius:
                                               BorderRadius.circular(8),
                                           child: Image.network(
-                                            'http://192.168.1.75:4000/images/${product.image}',
+                                            '${AppConfig.baseUrl}/images/${product.image}',
                                             fit: BoxFit.cover,
                                             height: 100,
                                             width: double.infinity,
