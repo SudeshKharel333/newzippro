@@ -14,6 +14,30 @@ import '/screen/product/product_view.dart';
 // Import your search screen
 import '../../widgets/input_fields.dart';
 import "/widgets/product.dart";
+import 'package:shared_preferences/shared_preferences.dart';
+
+Future<void> saveRecentlyViewedProduct(int id) async {
+  print("$id is saved");
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  // Get previously saved list
+  List<String> recent = prefs.getStringList('recentlyViewed') ?? [];
+
+  // Remove ID if it already exists (to avoid duplicate entries)
+  recent.remove(id.toString());
+
+  // Add current product ID to the beginning
+  recent.insert(0, id.toString());
+
+  // Keep only the first 10 items
+  if (recent.length > 10) {
+    recent = recent.sublist(0, 10);
+  }
+
+  // Save back to SharedPreferences
+  await prefs.setStringList('recentlyViewed', recent);
+  print(" RECENT $recent is saved");
+}
 
 class ShopHomePage extends StatefulWidget {
   const ShopHomePage({super.key});
@@ -25,6 +49,7 @@ class ShopHomePage extends StatefulWidget {
 class _ShopHomePageState extends State<ShopHomePage> {
   // A list to store products fetched from the API.
   List<Product> _products = [];
+  late Future<List<Product>> _recentProducts;
 
 // A list to store categories fetched from the API.
   List<Category> _categories = [];
@@ -43,9 +68,30 @@ class _ShopHomePageState extends State<ShopHomePage> {
 
     // Fetch the list of products from the server.
     fetchProducts();
+    _recentProducts = getRecentlyViewedProducts(); // Fetch products
 
     // Fetch the list of categories from the server.
     fetchCategories();
+  }
+
+  Future<List<Product>> getRecentlyViewedProducts() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> ids = prefs.getStringList('recentlyViewed') ?? [];
+    if (ids.isEmpty) return [];
+
+    final response = await Dio().post(
+      'http://192.168.1.70:3500/recent-products',
+      data: {'ids': ids},
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data;
+      print("api response is $data");
+
+      return data.map((json) => Product.fromJson(json)).toList();
+    } else {
+      throw Exception("Failed to load products");
+    }
   }
 
   Future<void> fetchCategories() async {
@@ -207,6 +253,78 @@ class _ShopHomePageState extends State<ShopHomePage> {
               ],
             ),
             // Carousel Slider
+
+            FutureBuilder<List<Product>>(
+              future: _recentProducts,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return CircularProgressIndicator(); // loading
+
+                List<Product> products = snapshot.data!;
+                if (products.isEmpty)
+                  return Text('No recently viewed products.');
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text("Recently Viewed",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                    ),
+                    SizedBox(
+                      height: 90,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: products.length,
+                        itemBuilder: (context, index) {
+                          final product = products[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      ProductPage(productId: product.id),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              child: Column(
+                                children: [
+                                  Image.network(
+                                      '${AppConfig.baseUrl}/images/${product.image}',
+                                      width: 40,
+                                      height: 40,
+                                      fit: BoxFit.cover),
+                                  Text(
+                                    product.name,
+                                    style: TextStyle(
+                                      fontSize:
+                                          15, // text size in logical pixels
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '\$${product.price}',
+                                    style: TextStyle(
+                                      fontSize:
+                                          10, // text size in logical pixels
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            SizedBox(height: 30),
             SizedBox(
               height: 180,
               child: CarouselSlider(
@@ -346,6 +464,8 @@ class _ShopHomePageState extends State<ShopHomePage> {
   Widget _buildProductCard(Product product) {
     return GestureDetector(
       onTap: () {
+        saveRecentlyViewedProduct(product.id); // Save this as recently viewed
+
         Navigator.push(
           context,
           MaterialPageRoute(
