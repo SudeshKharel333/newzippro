@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +74,14 @@ class _ShopHomePageState extends State<ShopHomePage> {
 
     // Fetch the list of categories from the server.
     fetchCategories();
+    // Refresh data every 5 minutes
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      fetchProducts();
+      fetchCategories();
+      setState(() {
+        _recentProducts = getRecentlyViewedProducts();
+      });
+    });
   }
 
   Future<List<Product>> getRecentlyViewedProducts() async {
@@ -80,7 +90,7 @@ class _ShopHomePageState extends State<ShopHomePage> {
     if (ids.isEmpty) return [];
 
     final response = await Dio().post(
-      'http://192.168.1.70:3500/recent-products',
+      'http://192.168.1.70:4000/recent-products',
       data: {'ids': ids},
     );
 
@@ -464,8 +474,9 @@ class _ShopHomePageState extends State<ShopHomePage> {
   Widget _buildProductCard(Product product) {
     return GestureDetector(
       onTap: () {
-        saveRecentlyViewedProduct(product.id); // Save this as recently viewed
-
+        setState(() {
+          saveRecentlyViewedProduct(product.id); // Save this as recently viewed
+        });
         Navigator.push(
           context,
           MaterialPageRoute(
