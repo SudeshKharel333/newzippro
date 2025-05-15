@@ -75,13 +75,13 @@ class _ShopHomePageState extends State<ShopHomePage> {
     // Fetch the list of categories from the server.
     fetchCategories();
     // Refresh data every 5 minutes
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      fetchProducts();
-      fetchCategories();
-      setState(() {
-        _recentProducts = getRecentlyViewedProducts();
-      });
-    });
+    // Timer.periodic(Duration(seconds: 1), (timer) {
+    //   fetchProducts();
+    //   fetchCategories();
+    //   setState(() {
+    //     _recentProducts = getRecentlyViewedProducts();
+    //   });
+    // });
   }
 
   Future<List<Product>> getRecentlyViewedProducts() async {
@@ -476,6 +476,7 @@ class _ShopHomePageState extends State<ShopHomePage> {
       onTap: () {
         setState(() {
           saveRecentlyViewedProduct(product.id); // Save this as recently viewed
+          _recentProducts = getRecentlyViewedProducts();
         });
         Navigator.push(
           context,
