@@ -21,7 +21,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> saveRecentlyViewedProduct(int id) async {
   print("$id is saved");
   final SharedPreferences prefs = await SharedPreferences.getInstance();
-
   // Get previously saved list
   List<String> recent = prefs.getStringList('recentlyViewed') ?? [];
 

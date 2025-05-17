@@ -43,6 +43,8 @@ dependencies:
   shared_preferences: ^2.5.3
   carousel_slider: ^5.0.0
   quantity_input: ^1.0.2
+  http: ^0.13.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
