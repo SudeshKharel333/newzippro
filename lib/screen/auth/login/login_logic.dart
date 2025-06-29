@@ -16,9 +16,9 @@ import '../../../core/widgets/costume_dialog.dart';
 
 class LoginLogic extends GetxController {
   TextEditingController passwordController =
-      TextEditingController(text: "password");
+      TextEditingController(text: "Vandina@122");
   TextEditingController emailController =
-      TextEditingController(text: "rough@gmail.com");
+      TextEditingController(text: "sudeshkharel15@gmail.com");
 
   //final _provider = AuthProvider();
   LoginResponse loginResponse = LoginResponse();
@@ -36,14 +36,15 @@ class LoginLogic extends GetxController {
   }
 
   login() async {
-    showDialog(
-      context: Get.context!,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const Loading("logging in..", false);
-      },
-    );
-
+    if (Get.context != null) {
+      showDialog(
+        context: Get.context!,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Loading("logging in..", false);
+        },
+      );
+    }
     String email = emailController.text;
     String password = passwordController.text;
 
@@ -61,6 +62,7 @@ class LoginLogic extends GetxController {
           extra: {'port': 3500},
         ),
       );
+
       Get.back(); // Dismiss loading dialog
       if (response.statusCode == 200 && response.data['success'] == true) {
         // Successfully logged in
@@ -78,7 +80,10 @@ class LoginLogic extends GetxController {
 
         Get.offAllNamed(AppRoutes.homeScreen);
       } else {
+        debugPrint('Login : ${response.data}');
+
         // Login failed even if status is 200
+
         Get.back(); // Dismiss loading
         showDialog(
           context: Get.context!,
