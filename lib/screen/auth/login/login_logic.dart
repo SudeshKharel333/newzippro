@@ -32,7 +32,7 @@ class LoginLogic extends GetxController {
 
   validateFields() {
     return InputValidators.emailValidator(emailController.text) == null &&
-        InputValidators.simpleValidation(passwordController.text) == null;
+        InputValidators.passwordValidator(passwordController.text) == null;
   }
 
   login() async {

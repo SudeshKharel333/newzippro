@@ -89,7 +89,7 @@ class _ShopHomePageState extends State<ShopHomePage> {
     if (ids.isEmpty) return [];
 
     final response = await Dio().post(
-      'http://192.168.1.70:4000/recent-products',
+      'http://192.168.1.77:4000/recent-products',
       data: {'ids': ids},
     );
 

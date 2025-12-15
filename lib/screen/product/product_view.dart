@@ -5,8 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:newzippro/constants/config.dart';
 import 'package:quantity_input/quantity_input.dart';
 
-import 'package:intl/intl.dart';
-
 class ProductPage extends StatefulWidget {
   final int productId;
   ProductPage({required this.productId});
